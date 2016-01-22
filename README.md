@@ -20,7 +20,7 @@ make install
 #展示当前的hosts
 hosts
 ```
-![image](https://github.com/aizuyan/images/blob/master/aizuyan-hosts/hosts.png)
+![image](https://github.com/aizuyan/images/blob/master/aizuyan-hosts/hosts.png 80%)
 ```shell
 #创建一个新的hosts文件
 hosts make
