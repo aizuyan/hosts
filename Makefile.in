@@ -165,6 +165,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 hosts_SOURCES = hosts.c
 hosts_CFLAGS = -DPREFIX=\"${prefix}/\"
+hostsbindir = \"${prefix}/\"
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -622,8 +623,9 @@ uninstall-am: uninstall-binPROGRAMS
 
 
 install-exec-hook:
-	mkdir -p ${prefix}/data
+	chown root ${prefix}/bin/hosts
 	chmod u+s ${prefix}/bin/hosts
+	mkdir -p ${prefix}/data
 	ln -s ${prefix}/bin/hosts /usr/local/bin/hosts
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
