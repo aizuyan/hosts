@@ -505,7 +505,6 @@ installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -621,6 +620,11 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
+
+install:check install-am
+
+check:
+	if [ `id -u` != 0 ]; then echo -e "must run as root !\n";exit 1;  fi
 
 install-exec-hook:
 	chown root ${prefix}/bin/hosts
