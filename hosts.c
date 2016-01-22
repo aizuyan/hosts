@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	/**init*/
 	char hostsdir[PATH_LEN] = {0};
 	strcat(hostsdir, PREFIX);
-	strcat(hostsdir, HOSTS_DIR);
+	//strcat(hostsdir, HOSTS_DIR);
 	strcat(hostsdir, DATA_DIR);
 
 	char nowhostsname[PATH_LEN] = {0};
@@ -30,14 +30,14 @@ int main(int argc, char **argv)
 
 	char nowhostspath[PATH_LEN] = {0};
 	strcat(nowhostspath, PREFIX);
-	strcat(nowhostspath, HOSTS_DIR);
+	//strcat(nowhostspath, HOSTS_DIR);
 	strcat(nowhostspath, DATA_DIR);
 	strcat(nowhostspath, NOW_HOSTS_NAME);
 	strcat(nowhostspath, SUFFIX);
 
 	char backuphostspath[PATH_LEN] = {0};
 	strcat(backuphostspath, PREFIX);
-	strcat(backuphostspath, HOSTS_DIR);
+	//strcat(backuphostspath, HOSTS_DIR);
 	strcat(backuphostspath, DATA_DIR);
 	strcat(backuphostspath, BACKUP_HOSTS_NAME);
 	strcat(backuphostspath, SUFFIX);
@@ -53,6 +53,7 @@ int main(int argc, char **argv)
 	if(!PATH_EXISTS(backuphostspath))
 	{
 	//不存在备份文件的话尝试备份文件
+		printf("%s => %s\n", ETC_HOSTS, backuphostspath);
 		if(copyfile(ETC_HOSTS, backuphostspath))
 		{
 			printf("备份系统hosts配置文件失败！\n");
@@ -78,7 +79,7 @@ int main(int argc, char **argv)
 				char * name = currenthostsname(nowhostspath);
 				char namepath[PATH_LEN] = {0};
 				strcat(namepath, PREFIX);
-				strcat(namepath, HOSTS_DIR);
+				//strcat(namepath, HOSTS_DIR);
 				strcat(namepath, DATA_DIR);
 				strcat(namepath, name);
 				strcat(namepath, SUFFIX);
@@ -185,11 +186,11 @@ int main(int argc, char **argv)
 			break;
 		case HOSTS_ADD:
 			{
-				/*if(!PATH_WRITE_ABLE(ETC_HOSTS))
+				if(!PATH_WRITE_ABLE(ETC_HOSTS))
 				{
 					printf("没有系统hosts配置文件写权限！\n");
 					return 1;
-				}*/
+				}
                 //验证添加参数是否正确
                 char *ip = argv[2];
                 char web[BUF_LEN] = {0};
@@ -220,11 +221,11 @@ int main(int argc, char **argv)
 			break;
 		case HOSTS_CHANGE:
 			{
-				/*if(!PATH_WRITE_ABLE(ETC_HOSTS))
+				if(!PATH_WRITE_ABLE(ETC_HOSTS))
 				{
 					printf("没有系统hosts配置文件写权限！\n");
 					return 1;
-				}*/
+				}
 				char path[PATH_LEN] = {0};
 				sprintf(path, "%s%s%s", hostsdir, argv[2], SUFFIX);
 				if(!PATH_EXISTS(path))
@@ -232,18 +233,18 @@ int main(int argc, char **argv)
 					printf("你要切换的hosts配置文件不存在！\n");
 					return 1;
 				}
-				printf("%s\n", path);
 				copyfile(path, ETC_HOSTS);
-				
+				savenowhostsname(argv[2], nowhostspath);	
+				printf("切换hosts配置文件成功！\n");
 			}
 			break;
 		case HOSTS_DEL:
 			{
-				/*if(!PATH_WRITE_ABLE(ETC_HOSTS))
+				if(!PATH_WRITE_ABLE(ETC_HOSTS))
 				{
 					printf("没有系统hosts配置文件写权限！\n");
 					return 1;
-				}*/
+				}
                 char path[PATH_LEN] = {0};
 				char * nowname = currenthostsname(nowhostspath);
 				strcat(path, hostsdir);
@@ -251,9 +252,58 @@ int main(int argc, char **argv)
 				strcat(path, SUFFIX);
                 char *ip = argv[2];
                 char *web = argv[3];
-printf("ip => %s\nweb => %s\n path => %s\n", ip, web, path);
                 delhosts(ip, web, path);
-                //change_etc_hosts(HOSTS, hosts);
+				copyfile(path, ETC_HOSTS);
+				printf("删除指定hosts成功！\n");
+			}
+			break;
+		case HOSTS_NAMES:
+			{
+				pFileList pCursor = dirfiles(hostsdir, passhosts);
+				while(pCursor->next != NULL)
+				{
+					pCursor = pCursor->next;
+					//如过是当前的hosts显示颜色提示
+					char * nowname = currenthostsname(nowhostspath);
+					char nownametmp[PATH_LEN] = {0};
+					strcat(nownametmp, nowname);
+					strcat(nownametmp, SUFFIX);
+					if(!strcmp(nownametmp, pCursor->d_name))
+					{
+                        printf("\033[40m\033[32m%s\033[0m\n", pCursor->d_name);
+					}
+					else
+					{
+                        printf("\033[40m\033[37m%s\033[0m\n", pCursor->d_name);
+					}
+				}
+			}
+			break;
+		case HOSTS_REMOVE:
+			{
+				char * nowname = currenthostsname(nowhostspath);
+				if(!strcmp(nowname, argv[2]))
+				{
+					printf("不能删除当前正在使用的hosts配置文件\n");
+					return 1;
+				}
+				char path[PATH_LEN] = {0};
+				strcat(path, hostsdir);
+				strcat(path, argv[2]);
+				strcat(path, SUFFIX);
+				if(PATH_EXISTS(path))
+				{
+					if(remove(path) != 0)
+					{
+						printf("删除失败！\n");
+						return 1;
+					}
+				}
+				else
+				{
+					printf("你要删除的配置文件不存在!\n");
+					return 1;
+				}
 			}
 			break;
 	}
@@ -370,7 +420,6 @@ int delhosts(char const *ip, char const *web, char const *path)
 			else
 			{
 				item[j] = '\0';
-				printf("@%s\n", item);
 				if(item[0] != '\0')
 				{   
 					if(!flag)
@@ -417,7 +466,6 @@ int delhosts(char const *ip, char const *web, char const *path)
 	fclose(fp);
 	fclose(fp_tmp);
 	copyfile(path_tmp, path);
-	copyfile(path, ETC_HOSTS);
 	remove(path_tmp);
 	return 0;
 }
@@ -542,6 +590,21 @@ void formatline(char *buf, char *buf_tmp)
 		i++;
 	}   
 	buf_tmp[i] = '\0';
+}
+
+int accesswriteable(char const *path)
+{
+    if(access(path, F_OK))
+    {
+        return -1;
+    }
+    FILE *fp = fopen(path, "a");
+    if(fp == NULL)
+    {
+        return -1;
+    }
+    fclose(fp);
+    return 0;
 }
 
 void helpers()

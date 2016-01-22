@@ -32,7 +32,7 @@
 
 #define PATH_EXISTS(path) (access(path, F_OK) == 0)
 
-#define PATH_WRITE_ABLE(path) (access(path, W_OK) == 0)
+#define PATH_WRITE_ABLE(path) (accesswriteable(path) == 0)
 
 #define BUF_LEN 1024
 
@@ -60,6 +60,7 @@ int parse_command(int, char **);
 int checkargs(int, char **, int);
 void formatline(char *, char *);
 int delhosts(char const *, char const *, char const *);
+int accesswriteable(char const *);
 void helpers();
 
 
