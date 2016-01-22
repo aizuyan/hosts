@@ -1,6 +1,5 @@
 #include "hosts.h"
 #include <stdio.h>
-#include <malloc.h>
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h>

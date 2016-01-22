@@ -1,3 +1,8 @@
+#ifdef __APPLE__
+#include <sys/malloc.h>
+#else
+#include <malloc.h>
+#endif
 #ifndef _HOSTS_MANAGER_H
 #define _HOSTS_MANAGER_H
 
